@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from .models import Email
 
 
-def test_anthropic(request):
+def index(request):
     # get the first email from the database
     email = Email.objects.get(id=1)
 
