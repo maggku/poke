@@ -5,7 +5,7 @@ from .models import Email
 
 def index(request):
     # get the first email from the database
-    email = Email.objects.get(id=1)
+    email = Email.objects.get(id=2)
 
     # send it to Anthropic
     client = anthropic.Anthropic()
@@ -16,7 +16,7 @@ def index(request):
             {
                 "role": "user",
                 "content": f"""
-                    Read this email and extract ONE clear task from it.
+                    Read this email and extract ONE clear task from it. Use a maximum of 40 characters.
 
                     Sender: {email.sender}
                     Subject: {email.subject}
