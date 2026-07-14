@@ -2,9 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Email_Detail</title>
 </head>
 <body>
+{% block content %}
+<p>{{ email.sender }}</p>
+<p>{{ email.subject }}</p>
+<p>{{ email.message }}</p>
+<p>{{ email.created_at }}</p>
+{% endblock %}
 
 </body>
 </html>
