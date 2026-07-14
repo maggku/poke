@@ -1,11 +1,12 @@
 import anthropic
-from django.http import HttpResponse
-from .models import Email
+from django.shortcuts import render, get_object_or_404
+from .models import Email, Task
+
 
 
 def index(request):
     # get the first email from the database
-    email = Email.objects.get(id=2)
+    email = get_object_or_404(Email, pk=request.GET.get("email"))
 
     # send it to Anthropic
     client = anthropic.Anthropic()
