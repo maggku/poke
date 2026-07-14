@@ -7,7 +7,9 @@
 <body>
 {% block content %}
 {% for task in tasks %}
-<p>{{task.description}}</p>
+    <p>
+        <a href="{% url 'email_detail' email_id=task.email.id %}">{{ task.description }}</a>
+    </p>
 {% endfor %}
 {% endblock %}
 
