@@ -13,7 +13,7 @@ class Email(models.Model):
 
 
 class Task(models.Model):
-    email = models.ForeignKey(Email, on_delete=models.CASCADE)
+    email = models.OneToOneField(Email, on_delete=models.CASCADE)
     description = models.TextField()
 
     def __str__(self):
