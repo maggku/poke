@@ -10,8 +10,6 @@
 <p>{{ email.subject }}</p>
 <p>{{ email.message }}</p>
 <p>{{ email.created_at }}</p>
-
-<a href="{% url 'generate_task_from_email' email_id=email.id %}">Generate Task</a>
 {% endblock %}
 
 </body>
