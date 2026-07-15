@@ -19,7 +19,7 @@ def email_detail(request, email_id):
 def tasks_display(request):
     task = Task.objects.all()
     return render(request, 'tasks/tasks.html', {'tasks': task})
-
+"""
 # Send an email to the Anthropic API, save the returned task, and redirect to the task list.
 def generate_task_from_email(request, email_id):
     email = get_object_or_404(Email, id=email_id)
@@ -56,3 +56,4 @@ def generate_task_from_email(request, email_id):
 
     return redirect('tasks')
 
+"""
