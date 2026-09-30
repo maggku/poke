@@ -4,214 +4,138 @@
 
 ---
 
-## Table of Contents
+# Poke
 
-- [Overview](#overview)
-- [Features](#features)
-- [User Stories](#user-stories)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Database Models](#database-models)
-- [Backend Flow](#backend-flow)
-- [Frontend Flow](#frontend-flow)
-- [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Environment Variables](#environment-variables)
-- [Usage](#usage)
-- [Templates](#templates)
-- [API Integration](#api-integration)
-- [Contributing](#contributing)
-- [License](#license)
+**Turns school emails into a clear to-do list for parents.**
 
----
+> **Status: work in progress (MVP).** The backend and a basic web interface work end to end. The Android app has not been started. See [Project status](#project-status).
 
-## Overview
+## The problem
 
-**School Mail Task Manager** connects to your school email account, reads incoming emails, and uses the **Anthropic Claude API** to extract key actions and deadlines — presenting them to you as a clean, prioritised task list. No more missing important school notices buried in long emails.
+Schools send many emails: trip forms, payment deadlines, non-uniform days, parents' evenings. The one thing a parent needs to do is easy to miss in the text. Poke reads each email and shows a short, actionable task, with the original email one click away so the parent can always check it.
 
----
+## Project status
 
-## Features
+| Component | Status |
+|---|---|
+| Django backend (models, Anthropic integration) | Done (MVP) |
+| Web UI (Django templates) | Done (basic) |
+| UI design (Figma) | Done |
+| REST API (JSON) | Planned |
+| Android app (React Native) | Planned, I am learning React |
+| Automated tests | TODO: describe what `tasks/tests.py` currently covers |
+| Authentication | Not implemented |
+| Email ingestion from a mailbox | Out of scope by design (see below) |
 
-- Fetches and parses school emails automatically
-- Uses Anthropic Claude API to extract tasks and action points
-- Displays tasks in a clean, easy-to-read home dashboard
-- View the original source email for full context
-- Two-template MVP layout (Home + Email Detail)
-- Secure handling of credentials via environment variables
+## How it works
 
----
-
-## User Stories
-
----
-## Tech Stack
-
-| Layer        | Technology |
-|--------------|-|
-| Backend      | Django (Python) |
-| AI / NLP     | Anthropic Claude API|
-| Frontend     | Django Templates, HTML/CSS |
-| Email Access | IMAP / Gmail API |
-| Environment  ||
-
----
-
-## Project Structure
-
-```
-poke/
-├── manage.py
-├── .env                    # Environment variables (not committed)
-├── requirements.txt
-├── poke/                   # Project settings
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-└── tasks/                  # Main app
-    ├── views.py
-    ├── urls.py
-    ├── models.py
-    ├── utils/
-    │   ├── email_reader.py     # Email fetching logic
-    │   └── anthropic_parser.py # Anthropic API integration
-    └── templates/
-        └── tasks/
-            ├── home.html       # Task list dashboard
-            └── email_detail.html # Original email view
-```
----
-
-## Database Models
-
----
-
-## Backend Flow
-
----
-
-## Frontend Flow
-
----
-
-## Getting Started
-
-### Prerequisites
-
-- Python 3.10+
-- pip
-- An [Anthropic API key](https://console.anthropic.com/)
-- Access to your school email (IMAP enabled or Gmail API credentials)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/school-mail-task-manager.git
-   cd school-mail-task-manager
-   ```
-
-2. **Create and activate a virtual environment**
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Apply migrations**
-   ```bash
-   python manage.py migrate
-   ```
-
-5. **Run the development server**
-   ```bash
-   python manage.py runserver
-   ```
-
----
-
-### Environment Variables
-
-Create a `.env` file in the root directory and add the following:
-
-```env
-SECRET_KEY=your_django_secret_key
-DEBUG=True
-
-# Anthropic
-ANTHROPIC_API_KEY=your_anthropic_api_key
-
-# Email credentials
-EMAIL_HOST=imap.gmail.com
-EMAIL_ADDRESS=your_school_email@example.com
-EMAIL_PASSWORD=your_email_password
+```mermaid
+flowchart LR
+    A[Emails stored in database] --> B[Open task list page]
+    B --> C{Email has a task?}
+    C -- yes --> E[Show task list]
+    C -- no --> D[Anthropic API: extract one task]
+    D --> F[Save Task in database]
+    F --> E
+    E --> G[Click a task: view original email]
 ```
 
-> ⚠️ **Never commit your `.env` file.** Make sure it is listed in `.gitignore`.
+1. Emails are stored in the `Email` table (sender, subject, message, created_at).
+2. When the task list page is opened, every email without a task is sent to the Anthropic API (model `claude-haiku-4-5-20251001`) with a prompt asking for one task of at most 40 characters.
+3. The result is saved as a `Task`, linked one-to-one to its email.
+4. The task list shows each task. Clicking one opens the full original email, so the user can verify the summary.
 
----
+![Architecture / project structure](docs/app_structure.png)
+<!-- TODO: add screenshots of the web UI and Figma designs to /docs and link them here -->
 
-## Usage
+## Design decisions
 
-1. Navigate to `http://127.0.0.1:8000/` to view your task dashboard
-2. The app will fetch your latest school emails and process them through the Anthropic API
-3. Tasks extracted from each email are displayed on the **Home** page
-4. Click any task or email entry to view the **original email** in full
+- **No mailbox connection (intentional).** These are emails about a child, so the app does not connect to Gmail or any inbox in v1. Emails are loaded into the database manually. Future options, each needing its own security review: a dedicated forwarding address, importing `.eml` files, or read-only OAuth with minimal scope.
+- **One task per email.** A deliberate MVP simplification, enforced by a `OneToOneField`. See limitations.
+- **Haiku model.** A small, fast, low-cost model is enough for short extraction.
+- **Show the source email next to every task.** AI output can be wrong, so the user can always check it.
 
----
+## Tech stack
 
-## Templates
+Python, Django, SQLite (development), Anthropic Python SDK, Django templates.
+Planned: Django REST Framework, React Native (Expo).
 
-### `home.html` — Task Dashboard
-- Displays a list of tasks extracted from school emails
-- Each task shows a summary, due date (if detected), and source email reference
-- Clean, minimal UI suitable for quick daily review
+## Setup
 
-### `email_detail.html` — Original Email View
-- Shows the full original email content
-- Provides context behind the extracted tasks
-- Includes a back button to return to the dashboard
-
----
-
-## API Integration
-
-This project uses the **Anthropic Claude API** to analyse email content and extract actionable tasks.
-
-**Example prompt structure:**
-```
-Given the following school email, extract all tasks, deadlines, 
-and action items. Return them as a structured list.
-
-Email:
-{email_body}
+```bash
+git clone <repo-url>
+cd poke
+python -m venv venv
+source venv/bin/activate        # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env            # then add your own ANTHROPIC_API_KEY
+python manage.py migrate
+python manage.py createsuperuser
+python manage.py runserver
 ```
 
-The response is parsed and stored against the relevant email record in the database.
+Add some sample emails through the Django admin at `/admin/`, then open the task list page (see `tasks/urls.py` for the route).
 
----
+**Never commit `.env`, API keys or real emails.** They are listed in `.gitignore`.
 
-## Contributing
+## User stories
 
-Contributions are welcome! Please follow these steps:
+1. As a parent, I want each school email reduced to one clear task, so I can see what to do at a glance.
+2. As a parent, I want to open the original email from a task, so I can check the details myself.
+3. As a parent, I want deadlines and payment amounts shown on the task, so I don't miss them. *(planned)*
+4. As a parent, I want to mark tasks as done, so my list only shows what is left. *(planned)*
+5. As a parent, I want to use the app on my Android phone, so I can check tasks on the go. *(planned)*
+6. As a parent, I want emails with no action to be marked "no action needed", so my list isn't cluttered. *(planned)*
 
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -m 'Add your feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Open a Pull Request
+## Testing
 
----
+- **Current state:** TODO: describe honestly what `tasks/tests.py` contains (for example "basic model tests" or "placeholder, no tests yet").
+- **Planned:**
+  - A fixture set of 10 to 15 synthetic emails with expected tasks, covering: no action, several actions, ambiguous dates ("next Friday"), forwarded chains, payment requests, very long emails.
+  - Unit tests that **mock** the Anthropic API, so they are fast, free and deterministic.
+  - A small separate set of live checks against the real API, comparing output to expected tasks.
+  - Failure cases: API timeout, rate limit, empty or over-long response.
 
-## License
+## Known limitations
 
-This project is licensed under the [MIT License](LICENSE).
+1. **One task per email.** An email with three actions produces one task, and an email with no action is still forced to produce one.
+2. **Task creation happens on page load.** Opening the task list triggers one API call per new email. This is slow with many emails and costs money.
+3. **No error handling around the API call.** If a call fails, the page returns an error. The fix is to catch API errors and use a timeout.
+4. **The 40-character limit is only requested in the prompt, not enforced.**
+5. **No authentication.** Anyone who can reach the server can see the tasks and emails. This must be fixed before any deployment.
+6. **Prompt injection.** Email text is inserted directly into the prompt, so a malicious email could try to influence the output.
+7. **Model output can be wrong**, for example misreading a date. Users should always check the source email.
+8. **Dates and deadlines are not extracted as structured data yet.**
 
----
+## Privacy and security
 
-> Built with using Django and the Anthropic Claude API.
+- Email content is personal data relating to a child, so real emails are not committed to this repository. Use synthetic samples.
+- For each email, the sender, subject and message are sent to the Anthropic API. Planned: remove the sender (not needed for the task) and redact names, phone numbers and addresses before sending.
+- The API key is read from an environment variable and is never committed.
+- Before any real-world use, I will review Anthropic's current API data retention and usage terms (link here) and my UK GDPR obligations.
+- Authentication and HTTPS are required before the app is deployed or used from a phone.
+
+## Roadmap
+
+**Next (backend hardening)**
+- Error handling and timeouts on the API call
+- Move task creation out of the page load (management command or "Summarise" button)
+- Remove sender from the prompt and add redaction
+- Fixture emails and mocked tests
+- Authentication
+
+**Then (mobile)**
+- REST API with Django REST Framework, with generated API docs
+- Learn React and React Native (Expo)
+- First screen: list tasks from the API
+- Second screen: task plus source email
+- Apply the Figma design
+- Test on Android devices and publish to Google Play
+
+**Later**
+- Multiple tasks per email, deadlines, task completion
+- Safe email ingestion (forwarding address or `.eml` import)
+
+## Licence
+
+TODO: choose a licence or state "All rights reserved".
