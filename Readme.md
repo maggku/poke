@@ -116,26 +116,34 @@ Add some sample emails through the Django admin at `/admin/`, then open the task
 - Authentication and HTTPS are required before the app is deployed or used from a phone.
 
 ## Roadmap
-
-**Next (backend hardening)**
-- Error handling and timeouts on the API call
-- Move task creation out of the page load (management command or "Summarise" button)
-- Remove sender from the prompt and add redaction
-- Fixture emails and mocked tests
-- Authentication
-
-**Then (mobile)**
-- REST API with Django REST Framework, with generated API docs
-- Learn React and React Native (Expo)
-- First screen: list tasks from the API
-- Second screen: task plus source email
+ 
+Each phase produces something that can be demonstrated. Time estimates assume 1 to 2 hours a day.
+ 
+**Phase 1: Make it safe and solid (days 1-5)**
+- Rename the project and tidy the repository (remove unused placeholder files)
+- Error handling and timeouts on the Anthropic API call
+- Move the API call into `utils/anthropic_parser.py`
+- Remove the sender from the prompt (send the minimum data needed)
+- Move task creation off the page load and into a management command, so visitors cannot trigger paid API calls
+- Synthetic fixture emails covering edge cases, with tests that mock the Anthropic API
+- Mobile-friendly templates (base template, viewport tag, simple CSS)
+- Demo login or read-only demo mode
+**Phase 2: Live web demo (days 6-8)**
+- Production settings (`DEBUG=False`, secret key and allowed hosts from environment variables, static files)
+- Deploy to a hosting provider with synthetic data only, and set an API spending limit
+- Add the live link, screenshots and a short screen recording to this README
+**Phase 3: Learn React (days 9-10 and ongoing)**
+- Core React concepts (components, props, state, hooks)
+**Phase 4: Android app (approx. weeks 3-12)**
+- REST API with Django REST Framework, token authentication and generated API docs
+- Expo (React Native) project: first screen lists tasks from the hosted API
+- Task detail screen showing the source email
 - Apply the Figma design
-- Test on Android devices and publish to Google Play
-
+- Test on real Android devices, then closed testing and release on Google Play (check current Google Play requirements for new developer accounts)
 **Later**
 - Multiple tasks per email, deadlines, task completion
-- Safe email ingestion (forwarding address or `.eml` import)
-
+- Safe email ingestion (forwarding address or `.eml` import), each option with its own security review
 ## Licence
-
+ 
 TODO: choose a licence or state "All rights reserved".
+ 
