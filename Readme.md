@@ -80,12 +80,13 @@ Add some sample emails through the Django admin at `/admin/`, then open the task
 
 ## User stories
 
-1. As a parent, I want each school email reduced to one clear task, so I can see what to do at a glance.
+1. As a parent, I want a school email to be reduced to actionable tasks. Ideally one per email but more if needed. I need to see what to do at a glance.
 2. As a parent, I want to open the original email from a task, so I can check the details myself.
 3. As a parent, I want deadlines and payment amounts shown on the task, so I don't miss them. *(planned)*
 4. As a parent, I want to mark tasks as done, so my list only shows what is left. *(planned)*
 5. As a parent, I want to use the app on my Android phone, so I can check tasks on the go. *(planned)*
 6. As a parent, I want emails with no action to be marked "no action needed", so my list isn't cluttered. *(planned)*
+7. As a parent , I want to log in to my account. *(planned)*
 
 ## Testing
 
